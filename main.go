@@ -18,29 +18,18 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	"context"
-	"k8s.io/api/core/v1"
-
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	mydomainv1alpha1 "operators/api/v1alpha1"
 	"operators/controllers"
@@ -117,41 +106,6 @@ func main() {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}
-
-	/*** Pod ***/
-	c, err := controller.New("pod-controller", mgr, controller.Options{
-		Reconciler: reconcile.Func(func(ctx context.Context, o reconcile.Request) (reconcile.Result, error) {
-			log := ctrllog.FromContext(ctx)
-			podList := &corev1.PodList{}
-			listOpts := []client.ListOption{
-				client.InNamespace(""),
-			}
-
-			if err := client.Client.List(mgr.GetClient(), ctx, podList, listOpts...); err != nil {
-				log.Error(err, "Failed to list pods")
-				return ctrl.Result{}, err
-			}
-
-			for _, pod := range podList.Items {
-				fmt.Printf("Pod name: %s, Status: %s\n", pod.Name, pod.Status.Phase)
-			}
-
-			return reconcile.Result{}, nil
-		}),
-	})
-
-	if err != nil {
-		setupLog.Error(err, "unable to setup pod-controller")
-		os.Exit(1)
-	}
-
-	// Watch pods
-	err = c.Watch(&source.Kind{Type: &v1.Pod{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		setupLog.Error(err, "unable to watch pods")
-		os.Exit(1)
-	}
-	/*** End Pod ***/
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
