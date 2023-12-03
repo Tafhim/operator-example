@@ -51,6 +51,10 @@ type PodWatchManReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+
+/*
+This is the same function as the main.go, it relies on the Watcher in SetupWithManager
+*/
 func (r *PodWatchManReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrllog.FromContext(ctx)
 
@@ -64,7 +68,6 @@ func (r *PodWatchManReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	for _, pod := range podList.Items {
-		fmt.Printf("-----------")
 		fmt.Printf("Pod name: %s, Status: %s\n", pod.Name, pod.Status.Phase)
 	}
 
@@ -75,7 +78,7 @@ func (r *PodWatchManReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 func (r *PodWatchManReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mydomainv1alpha1.PodWatchMan{}).
-		Watches(
+		Watches( // added watcher here
 			&source.Kind{Type: &corev1.Pod{}},
 			&handler.EnqueueRequestForObject{},
 		).

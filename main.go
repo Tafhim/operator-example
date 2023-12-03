@@ -119,9 +119,6 @@ func main() {
 	}
 
 	/*** Pod ***/
-	// Create a new Controller that will call the provided Reconciler function in response
-	// to events.
-
 	c, err := controller.New("pod-controller", mgr, controller.Options{
 		Reconciler: reconcile.Func(func(ctx context.Context, o reconcile.Request) (reconcile.Result, error) {
 			log := ctrllog.FromContext(ctx)
