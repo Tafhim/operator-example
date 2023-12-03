@@ -1,0 +1,12 @@
+apiVersion: my.domain/v1alpha1
+kind: PodWatchMan
+metadata:
+  labels:
+    app.kubernetes.io/name: podwatchman
+    app.kubernetes.io/instance: podwatchman-sample
+    app.kubernetes.io/part-of: operators
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: operators
+  name: podwatchman-sample
+spec:
+  foo: bar 
